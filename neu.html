@@ -62,7 +62,7 @@ h1,h2,h3{font-family:var(--f-serif);font-weight:600;letter-spacing:-.01em;line-h
 .cartb{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:.9375rem;transition:border-color .2s}
 .cartb:hover{border-color:var(--gold)}.cartb svg{width:19px;height:19px;color:var(--gold)}.cartb b{font-variant-numeric:tabular-nums;min-width:1ch}
 .cartb.bump{animation:pop .45s}
-.mb{display:none;min-height:44px;min-width:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:none;font-weight:700;font-size:.9375rem;cursor:pointer}
+.mb{display:inline-flex;align-items:center;justify-content:center;width:44px;padding:0!important;flex:none;min-height:44px;min-width:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:none;font-weight:700;font-size:.9375rem;cursor:pointer}
 .hchat{display:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--gold);cursor:pointer;align-items:center;justify-content:center;position:relative;flex:none}.hchat svg{width:20px;height:20px}.hchat .dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--pink)}
 @media(max-width:900px){.nl{display:none}.mb{display:inline-flex;align-items:center;justify-content:center;padding:0;width:44px;flex:none}.hchat{display:inline-flex;margin-left:auto}.bar{gap:8px;padding-left:16px;padding-right:16px}.cbt{display:none!important}.cartb{padding:0 12px;flex:none}.wm{min-width:0;flex:0 1 auto}.wm img{height:auto;width:100%;max-width:170px;max-height:18px;object-fit:contain;object-position:left}}
 
@@ -351,6 +351,9 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .bonb .cx{display:none}.bonb.cust .cx{display:inline-flex}
 #bonp .in{font-size:11.5px;padding-left:14px}
 
+.starp.big button{width:56px;height:56px;font-size:28px;color:var(--surface3)}.starp.big button.on{color:var(--gold)}.starp button{color:var(--surface3)}.starp button.on{color:var(--gold)}
+@media(max-width:400px){.starp.big button{width:50px;height:50px}}
+
 /* ===== ADMIN (scoped) ===== */
 .adm-pg main{font:15px/1.5 var(--f-sans),system-ui,sans-serif;letter-spacing:0}
 .adm-pg .ann,.adm-pg footer.ft,.adm-pg .cbt,.adm-pg .chat{display:none!important}
@@ -570,6 +573,7 @@ const SD={
  res:{on:true,max:20},
  mail:{pk:'',sid:'',tid:''},
  pts:{on:true,per:1,need:100,eur:5},
+ rev:{on:true,g:'https://search.google.com/local/writereview?placeid=ChIJoZelCQCJsUcRHbFC75zoKRo'},
  bot:{on:true,hi:'Hallo! Ich bin der Boss-Assistent. Ich kann dir Fragen beantworten, einen Tisch für dich reservieren oder dir beim Bestellen helfen.',faq:[]},
  show:{rev:true,gal:true,verbs:true}
 };
@@ -610,7 +614,7 @@ const qT=new URLSearchParams(location.search).get('tisch');
 if(qT&&+qT>0){try{sessionStorage.setItem('bbT',String(+qT))}catch(e){}}
 let myT=+((()=>{try{return sessionStorage.getItem('bbT')}catch(e){return 0}})()||0);
 const neuN=()=>db.o.filter(o=>o.st==='neu').length;nn=neuN();
-function chk(){const n=neuN();if(n>nn&&adm)beep();nn=n}
+function chk(){const n=neuN();if(n>nn&&adm){beep();const o=db.o.filter(x=>x.st==='neu').sort((a,b)=>b.t-a.t)[0];if(o)notify('Neue Bestellung #'+o.id,(o.tb?'Tisch '+o.tb:o.mode)+(o.name?' · '+o.name:''))}nn=n}
 function save(){let ok=true;if(!FBon){try{localStorage.setItem(K,JSON.stringify(db))}catch(e){ok=false}}chk();if(FBon)sync();return ok}
 addEventListener('storage',e=>{if(!FBon&&e.key===K){db=load();chk();if(route()==='admin')render()}});
 /* ---------- Firebase (gemeinsame Datenbank) ---------- */
@@ -701,7 +705,7 @@ const KP=['bacon','classic','plate','hand'];
 function Home(){const t=S.t,os=openState();
  const kl=KL.map(find).filter(Boolean);
  const imgs=[...new Set(kl.map((x,j)=>db.im[x.i]||ph(KP[j%KP.length])))];
- const rv=db.v.filter(x=>x.a);const q=rv[rv.length-1];
+ const rv=db.v.filter(x=>x.a&&!x.fb);const q=rv[rv.length-1];
  const gal=['bacon','classic','hand','front'].map(ph);
  return `<div id="home">
  <section class="hero" aria-labelledby="h1">
@@ -739,7 +743,7 @@ function kAct(el){$$('.ki').forEach(k=>{k.classList.toggle('on',k===el);k.queryS
 function goMenu(e){if(!cartN()){e.preventDefault();go('menu')}}
 function updHome(){const os=openState(),l=$('#live');if(l){l.classList.toggle('on',os.on);l.querySelector('span').textContent=os.txt}
  const kl=KL.map(find).filter(Boolean),imgs=$$('.kp img').map(i=>i.getAttribute('src'));const k=$('#klist');if(k&&!k.contains(document.activeElement)){const on=$$('.ki').findIndex(x=>x.classList.contains('on'));k.innerHTML=KList(kl,imgs);const it=$$('.ki')[Math.max(0,on)];if(it)kAct(it)}
- const rv=db.v.filter(x=>x.a),q=rv[rv.length-1],w=$('#qwrap');if(w){const h=S.show.rev&&q?Quote(q,rv.length):'';if(w.dataset.h!==h){w.dataset.h=h;w.innerHTML=h}}}
+ const rv=db.v.filter(x=>x.a&&!x.fb),q=rv[rv.length-1],w=$('#qwrap');if(w){const h=S.show.rev&&q?Quote(q,rv.length):'';if(w.dataset.h!==h){w.dataset.h=h;w.innerHTML=h}}}
 function initHome(){
  $$('.ki').forEach(k=>k.addEventListener('mouseenter',()=>{if(innerWidth>860)kAct(k)}));
  clearInterval(window._vx);window._vx=setInterval(()=>{if(document.hidden||RM)return;const a=$$('.hbg img');if(a.length<2)return;const i=a.findIndex(x=>x.classList.contains('on'));a[i].classList.remove('on');a[(i+1)%a.length].classList.add('on')},5500);
@@ -886,10 +890,18 @@ async function resv(){const err=$('#rerr');fieldErr(['rn','rt']);const e=v('re')
  busy(1);try{rdone=await saveRes({d:rf.d,u:rf.u,p:rf.p,n:v('rn').trim(),t:v('rt').trim(),e,src:'Website'})}catch(x){busy(0);console.warn(x);err.textContent='Konnte nicht gesendet werden. Bitte Internet prüfen oder ruf uns an: '+S.c.tel;return}
  ofm={};render();top0()}
 /* ---------- Bewertungen ---------- */
-let vs=5;
-function Rev(){const L=db.v.filter(x=>x.a);return `<div class="pg"><h1 data-r>Bewertungen</h1><p class="intro" data-r>${L.length?`${L.length} ${L.length>1?'Gäste haben':'Gast hat'} uns bewertet. Danke!`:'Noch keine Bewertungen. Sei der Erste!'}</p><div class="two"><div>${L.slice().reverse().map(x=>`<div class="rv" data-r><span class="st" aria-label="${x.s} von 5 Sternen">${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span><blockquote>„${esc(x.t)}“</blockquote><span class="who">${esc(x.n)}</span></div>`).join('')}</div> // taste-skill-ignore: rating stars
- <form class="panel" data-r data-act="rate" onsubmit="event.preventDefault()" novalidate><h2>Wie war’s?</h2><p class="ptitle">Sterne</p><div class="starp" role="radiogroup" aria-label="Sterne">${[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="${n===vs}" aria-label="${n} Sterne" class="${n<=vs?'on':''}" onclick="vs=${n};$$('.starp button').forEach((b,j)=>{b.classList.toggle('on',j<${n});b.setAttribute('aria-checked',j===${n-1})})">★</button>`).join('')}</div>${fv('vn','Name',{a:'autocomplete="given-name"'})}<label class="f">Deine Meinung<textarea id="vt" rows="4"></textarea></label><p class="err" id="verr" role="alert"></p><button class="b full">Bewertung senden</button><p class="note">Bewertungen erscheinen nach kurzer Prüfung.</p></form></div></div>`} // taste-skill-ignore: rating stars
-async function rate(){if(!v('vn').trim()||!v('vt').trim()){$('#verr').textContent='Bitte Name und Text ausfüllen.';return}const x={id:Date.now(),n:v('vn').trim(),s:vs,t:v('vt').trim(),a:0};if(FBon&&!staff){try{await FB.put('reviews',x.id,x)}catch(e){$('#verr').textContent='Konnte nicht gesendet werden. Bitte später erneut versuchen.';return}}else{db.v.push(x);save()}ofm={};toast('Danke! Deine Bewertung erscheint nach der Freischaltung.');render()}
+let vs=0,vstep=0;
+const STARS=n=>[1,2,3,4,5].map(i=>`<button type="button" role="radio" aria-checked="${i===n}" aria-label="${i} ${i>1?'Sterne':'Stern'}" class="${i<=n?'on':''}" onclick="pickStar(${i})">★</button>`).join(''); // taste-skill-ignore: rating stars
+function pickStar(n){vs=n;vstep=1;render()}
+function RevBox(){const g=S.rev&&S.rev.on&&S.rev.g;
+ if(!vstep)return `<div class="panel" data-r><h2>Wie war’s bei uns?</h2><p class="note" style="margin:0 0 6px">Tippe auf die Sterne.</p><div class="starp big" role="radiogroup" aria-label="Sterne">${STARS(vs)}</div></div>`;
+ if(vstep===2)return `<div class="panel" data-r><h2>Danke für dein Feedback!</h2><p>Wir lesen jede Nachricht und melden uns, wenn du Kontaktdaten angegeben hast.</p>${g?`<p class="note">Möchtest du uns zusätzlich öffentlich bewerten? <a class="lk" href="${esc(g)}" target="_blank" rel="noopener">Auf Google bewerten</a></p>`:''}<button class="b ghost full" onclick="vs=0;vstep=0;render()">Fertig</button></div>`;
+ if(vs>=4&&g)return `<div class="panel" data-r><div class="starp big">${STARS(vs)}</div><h2 style="margin-top:14px">Das freut uns riesig!</h2><p>Würdest du das auch auf Google teilen? Das dauert eine Minute und hilft uns sehr.</p><a class="b full" style="margin-top:18px" href="${esc(g)}" target="_blank" rel="noopener" onclick="vstep=2;setTimeout(render,400)">Auf Google bewerten</a><button class="lk" style="margin-top:14px" onclick="vstep=3;render()">Lieber hier auf der Website schreiben</button></div>`;
+ const fb=vs<=3;
+ return `<form class="panel" data-r data-act="rate" onsubmit="event.preventDefault()" novalidate><div class="starp big">${STARS(vs)}</div><h2 style="margin-top:14px">${fb?'Das tut uns leid. Was können wir besser machen?':'Erzähl uns mehr'}</h2>${fb?'<p class="note">Deine Nachricht geht direkt an unser Team und wird nicht veröffentlicht.</p>':''}${fv('vn','Name',{a:'autocomplete="given-name"'})}<label class="f">${fb?'Was ist passiert?':'Deine Meinung'}<textarea id="vt" rows="4"></textarea></label>${fb?fv('vk','Telefon oder E-Mail, falls wir uns melden dürfen',{opt:1}):''}<p class="err" id="verr" role="alert"></p><button class="b full">${fb?'Feedback senden':'Bewertung senden'}</button>${fb&&g?`<p class="note">Du möchtest lieber öffentlich bewerten? <a class="lk" href="${esc(g)}" target="_blank" rel="noopener">Auf Google bewerten</a></p>`:''}</form>`}
+function Rev(){const L=db.v.filter(x=>x.a&&!x.fb);return `<div class="pg"><h1 data-r>Bewertungen</h1><p class="intro" data-r>${L.length?`Das sagen unsere Gäste.`:'Sag uns, wie es dir geschmeckt hat.'}</p><div class="two">${RevBox()}<div>${L.slice().reverse().map(x=>`<div class="rv" data-r><span class="st" aria-label="${x.s} von 5 Sternen">${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span><blockquote>„${esc(x.t)}“</blockquote><span class="who">${esc(x.n)}</span></div>`).join('')}</div></div></div>`} // taste-skill-ignore: rating stars
+async function rate(){const fb=vs<=3;if(!v('vn').trim()||!v('vt').trim()){$('#verr').textContent='Bitte Name und Text ausfüllen.';return}const x={id:Date.now(),n:v('vn').trim(),s:vs,t:v('vt').trim(),a:0};if(fb){x.fb=1;x.k=v('vk').trim()}
+ if(FBon&&!staff){try{await FB.put('reviews',x.id,x)}catch(e){$('#verr').textContent='Konnte nicht gesendet werden. Bitte später erneut versuchen.';return}}else{db.v.push(x);save()}ofm={};vstep=2;if(!fb)toast('Danke! Deine Bewertung erscheint nach der Freischaltung.');render();top0()}
 function toast(t,warn){$$('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast'+(warn?' err2':'');d.setAttribute('role','status');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)}
 /* ---------- E-Mail (EmailJS) ---------- */
 const loadJS=(u)=>new Promise((ok,no)=>{if(document.querySelector(`script[src="${u}"]`)){const w=()=>window.emailjs?ok():setTimeout(w,100);return w()}const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
@@ -910,8 +922,9 @@ const AIC={kasse:'🧾',tische:'🍽',kds:'👨‍🍳',online:'🛵',karte:'�
 const TABS_OF={admin:Object.keys(TABS),kellner:['tische','kasse'],kueche:['kds']};
 const myTabs=()=>TABS_OF[role]||[];
 const onlineOpen=()=>db.o.filter(o=>o.src==='Online'&&o.st==='neu').length;
-const readyL=()=>db.o.filter(o=>o.st==='fertig'&&o.tb);
-function admDrawer(){return `<div class="dh"><img src="${IMG.wm}" alt="Burger Boss"><button class="x" onclick="adr(0)" aria-label="Menü schließen">✕</button></div><div class="dc">Angemeldet als <b>${ROLE_N[role]||''}</b></div>${myTabs().map(k=>`<a class="${at===k?'on':''}" onclick="at='${k}';tb=null;tv=null;render()">${AIC[k]} ${TABS[k]}${k==='kds'&&neuN()?` <b class="cnt">${neuN()}</b>`:''}${k==='online'&&onlineOpen()?` <b class="cnt">${onlineOpen()}</b>`:''}${k==='tische'&&readyL().length?` <b class="cnt">${readyL().length}</b>`:''}</a>`).join('')}${role==='admin'?'<a href="#home">🏠 Zur Website</a>':''}<a class="adm" onclick="logout()">🚪 Abmelden</a>`}
+const readyL=()=>db.o.filter(o=>o.st==='fertig'&&(o.tb?true:role==='admin'));
+const whoO=o=>o.tb?'Tisch '+o.tb:o.mode==='Lieferung'?'Lieferung'+(o.name?' · '+o.name:''):'Abholung'+(o.name?' · '+o.name:'');
+function admDrawer(){return `<div class="dh"><img src="${IMG.wm}" alt="Burger Boss"><button class="x" onclick="adr(0)" aria-label="Menü schließen">✕</button></div><div class="dc">Angemeldet als <b>${ROLE_N[role]||''}</b></div>${myTabs().map(k=>`<a class="${at===k?'on':''}" onclick="at='${k}';tb=null;tv=null;render()">${AIC[k]} ${TABS[k]}${k==='kds'&&neuN()?` <b class="cnt">${neuN()}</b>`:''}${k==='online'&&onlineOpen()?` <b class="cnt">${onlineOpen()}</b>`:''}${k==='tische'&&readyL().length?` <b class="cnt">${readyL().length}</b>`:''}</a>`).join('')}<a onclick="testAlert()">🔔 Ton &amp; Benachrichtigung testen</a>${role==='admin'?'<a href="#home">🏠 Zur Website</a>':''}<a class="adm" onclick="logout()">🚪 Abmelden</a>`}
 let lstep=null;
 function Admin(){if(!adm){
   if(!lstep)return `<div class="w lw"><h2>Personal-Bereich</h2><p class="mu">Wer bist du?</p><div class="roles">${Object.entries(ROLE_N).map(([k,n])=>`<button class="role" onclick="lstep='${k}';render()"><span>${{admin:'👔',kellner:'🍽',kueche:'👨‍🍳'}[k]}</span><b>${n}</b><small>${{admin:'Alles: Kasse, Umsatz, Website',kellner:'Tische, Bestellungen, Rechnungen',kueche:'Küchenmonitor'}[k]}</small></button>`).join('')}</div><p style="margin-top:20px"><a href="#home" class="mu">← Zur Website</a></p></div>`;
@@ -922,7 +935,7 @@ const ALIAS={kueche:KITCHEN_EM,'küche':KITCHEN_EM,admin:ADMIN_EM,kellner:KELLNE
 let logging=false;
 async function login(){if(logging)return;const raw=v('lu').trim().toLowerCase(),em=ALIAS[raw]||raw;if(!FBon){toast('Keine Verbindung zum Server. Bitte Internet prüfen und Seite neu laden.',1);return}if(!em||!v('lp')){toast('Bitte E-Mail und Passwort eingeben.',1);return}
  selRole=lstep||'admin';try{sessionStorage.setItem('bbRole',selRole)}catch(e){}
- logging=true;try{await FB.login(em,v('lp'));unlockAudio()}catch(e){toast('E-Mail oder Passwort falsch.',1)}logging=false}
+ unlockAudio();askNotify();logging=true;try{await FB.login(em,v('lp'));unlockAudio()}catch(e){toast('E-Mail oder Passwort falsch.',1)}logging=false}
 function logout(){lstep=null;try{sessionStorage.removeItem('bbRole')}catch(e){}if(FBon)FB.logout();else{adm=false;role=null;render()}}
 /* ---- Ton ---- */
 let AC=null;function unlockAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}}
@@ -932,10 +945,13 @@ function readyTone(){tone([[784,.22],[988,.22],[1319,.45],[784,.22],[988,.22],[1
 document.addEventListener('pointerdown',unlockAudio,{once:true});
 /* ---- Fertig-Meldungen für Kellner ---- */
 let seenSt=null;
-function watchReady(){const m={};db.o.forEach(o=>m[o.id]=o.st);if(seenSt&&adm&&(role==='kellner'||role==='admin')){const nw=db.o.filter(o=>o.st==='fertig'&&seenSt[o.id]&&seenSt[o.id]!=='fertig'&&o.tb);if(nw.length){readyTone();if(navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}}}seenSt=m;renderReady()}
+function notify(title,body){try{if('Notification' in window&&Notification.permission==='granted'&&(document.hidden||!document.hasFocus())){const n=new Notification(title,{body,icon:IMG.icon,tag:title,renotify:true});n.onclick=()=>{window.focus();n.close()}}}catch(e){}}
+function askNotify(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}}
+function testAlert(){unlockAudio();askNotify();readyTone();toast('🔔 Ton-Test – hörst du den Ton? Wenn nicht: Lautstärke und Tab-Ton prüfen');setTimeout(()=>{try{if('Notification' in window&&Notification.permission==='granted')new Notification('Burger Boss',{body:'Benachrichtigungen funktionieren ✅',icon:IMG.icon})}catch(e){}},600)}
+function watchReady(){const m={};db.o.forEach(o=>m[o.id]=o.st);if(seenSt&&adm&&(role==='kellner'||role==='admin')){const nw=db.o.filter(o=>o.st==='fertig'&&seenSt[o.id]&&seenSt[o.id]!=='fertig'&&(o.tb||role==='admin'));if(nw.length){readyTone();if(navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}nw.forEach(o=>notify('🔔 '+whoO(o)+' ist fertig','Bestellung #'+o.id+' bitte abholen'))}}seenSt=m;renderReady()}
 function renderReady(){let r=$('#ready');if(!r){r=document.createElement('div');r.id='ready';r.setAttribute('role','status');r.setAttribute('aria-live','assertive');document.body.appendChild(r)}
  const L=adm&&(role==='kellner'||role==='admin')&&route()==='admin'?readyL():[];r.hidden=!L.length;
- r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 <b>Tisch ${o.tb}</b> · #${o.id} ist fertig – bitte abholen</span><button onclick="served(${o.id})">Abgeholt</button></div>`).join('')}
+ r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 <b>${esc(whoO(o))}</b> · #${o.id} ist fertig – bitte abholen</span><button onclick="served(${o.id})">Abgeholt</button></div>`).join('')}
 function served(id){const o=db.o.find(x=>x.id===id);if(!o)return;o.st='done';save();renderReady();if(route()==='admin')render()}
 /* ---- Punkte gutschreiben ---- */
 async function ptsCredit(o,tel){const k=ptsKey(tel||(o.pts&&o.pts.k)||o.tel||'');if(!S.pts.on||!k||(o.pts&&o.pts.done))return;
@@ -1040,7 +1056,7 @@ function ResA(){const L=[...db.r].sort((a,b)=>(a.d+a.u).localeCompare(b.d+b.u)),
 async function rs(id,s){const r=db.r.find(r=>r.id===id);if(!r)return;if(s==='x'&&!confirm('Reservierung wirklich stornieren?'))return;r.st=s;save();render();
  if(r.e&&mailOn()){const res=await mailTo(r.e,r.n,s==='ok'?'Ihre Reservierung bei Burger Boss ist bestätigt':'Ihre Reservierung bei Burger Boss',msgR(r));if(res==='ok'){r.ml=s;save();render()}}
  else toast(s==='ok'?'Reservierung bestätigt'+(r.e?'':' – bitte Gast per „Kontaktieren“ informieren'):'Reservierung storniert')}
-function RevA(){return `<div class="card">${db.v.length?db.v.map(x=>`<div class="it"><div class="d"><b>${esc(x.n)}</b> <span class="st">${'★'.repeat(x.s)}</span> <span class="bd">${x.a?'Veröffentlicht':'Wartet'}</span><small>${esc(x.t)}</small></div><button class="btn s" onclick="rv(${x.id},1)">${x.a?'Verbergen':'Freischalten'}</button><button class="btn s g" onclick="rv(${x.id},0,1)">Löschen</button></div>`).join(''):'<p class="mu">Noch keine Bewertungen.</p>'}</div>`}
+function RevA(){return `<p class="mu">„Feedback (privat)“ sind Nachrichten von unzufriedenen Gästen (1–3 Sterne). Sie werden nicht veröffentlicht.</p><div class="card">${db.v.length?db.v.slice().reverse().map(x=>`<div class="it"><div class="d"><b>${esc(x.n)}</b> <span class="st">${'★'.repeat(x.s)}</span> <span class="bd" style="${x.fb?'background:#e8b25a;color:#000':''}">${x.fb?'Feedback (privat)':x.a?'Veröffentlicht':'Wartet'}</span><small>${esc(x.t)}</small>${x.k?`<small>Kontakt: ${esc(x.k)}</small>`:''}</div>${x.fb?'':`<button class="btn s" onclick="rv(${x.id},1)">${x.a?'Verbergen':'Freischalten'}</button>`}<button class="btn s g" onclick="rv(${x.id},0,1)">Löschen</button></div>`).join(''):'<p class="mu">Noch keine Bewertungen.</p>'}</div>`}
 function rv(id,t,del){if(del){if(!confirm('Bewertung löschen?'))return;db.v=db.v.filter(x=>x.id!==id)}else{const x=db.v.find(y=>y.id===id);x.a=x.a?0:1}save();render()}
 /* ---- Website bearbeiten ---- */
 let SE=null,sTab='texte';
@@ -1054,7 +1070,7 @@ function Site(){if(!SE)SE=clone(S);const s=SE;let b='';
  if(sTab==='texte')b=`<div class="card"><div class="row">${TXT.map(([k,l,t])=>ip('t.'+k,l,s.t[k],{ta:t==='ta'})).join('')}</div>${ip('ann','Ankündigung ganz oben (leer = aus), z. B. „Neu: Linsen Burger“',s.ann)}</div>`;
  if(sTab==='kontakt')b=`<div class="card"><div class="row">${ip('c.addr1','Straße',s.c.addr1)}${ip('c.addr2','PLZ und Ort',s.c.addr2)}${ip('c.tel','Telefon',s.c.tel)}${ip('c.wa','WhatsApp-Nummer',s.c.wa)}${ip('c.ig','Instagram-Name (ohne @)',s.c.ig)}${ip('c.mail','E-Mail des Restaurants',s.c.mail)}</div><h3>Öffnungszeiten</h3>${[1,2,3,4,5,6,0].map(d=>`<div class="hrow"><b>${DN[d]}</b><input type="time" value="${s.hrs[d]?s.hrs[d][0]:''}" ${s.hrs[d]?'':'disabled'} onchange="SE.hrs[${d}][0]=this.value"><input type="time" value="${s.hrs[d]?s.hrs[d][1]:''}" ${s.hrs[d]?'':'disabled'} onchange="SE.hrs[${d}][1]=this.value"><button class="btn s g" onclick="SE.hrs[${d}]=SE.hrs[${d}]?null:['11:00','22:45'];render()">${s.hrs[d]?'Ruhetag':'Öffnen'}</button></div>`).join('')}</div>`;
  if(sTab==='bilder')b=`<p class="mu">Tippe auf ein Bild, um es zu ersetzen. Querformat-Fotos wirken am besten.</p><div class="card slotg">${SLOTS.map(([k,l])=>`<div class="slot"><label class="ph"><img src="${ph(k)}" alt=""><input type="file" accept="image/*" onchange="setSlot('${k}',this)"></label><span>${l}</span>${db.im['site_'+k]?`<a style="color:var(--am);cursor:pointer" onclick="delSlot('${k}')">Original wiederherstellen</a>`:''}</div>`).join('')}</div>`;
- if(sTab==='bestellen')b=`<div class="card"><h3 style="margin-top:0">Lieferung</h3>${cb('del.on','Online-Lieferung ist aktiv',s.del.on)}<div class="row">${ip('del.fee','Liefergebühr (€, 0 = kostenlos)',s.del.fee,{type:'number',step:'0.1'})}${ip('del.min','Mindestbestellwert (€, 0 = keiner)',s.del.min,{type:'number',step:'0.5'})}${ip('del.eta','Lieferzeit-Hinweis, z. B. 30–45 Min.',s.del.eta)}${ip('del.area','Liefergebiet, z. B. Barmbek und Winterhude',s.del.area)}</div><h3>Am Tisch bestellen (QR)</h3>${cb('tisch.on','Bestellen am Tisch ist aktiv',s.tisch.on)}${ip('tn','Anzahl Tische',s.tn,{type:'number'})}<h3>Reservierung</h3>${ip('res.max','Max. Personen pro Online-Reservierung',s.res.max,{type:'number'})}<h3>Startseite</h3>${cb('show.verbs','Abschnitt „So kommst du an deinen Burger“ zeigen',s.show.verbs)}${cb('show.gal','Fotos zeigen',s.show.gal)}${cb('show.rev','Bewertung auf der Startseite zeigen',s.show.rev)}</div>`;
+ if(sTab==='bestellen')b=`<div class="card"><h3 style="margin-top:0">Lieferung</h3>${cb('del.on','Online-Lieferung ist aktiv',s.del.on)}<div class="row">${ip('del.fee','Liefergebühr (€, 0 = kostenlos)',s.del.fee,{type:'number',step:'0.1'})}${ip('del.min','Mindestbestellwert (€, 0 = keiner)',s.del.min,{type:'number',step:'0.5'})}${ip('del.eta','Lieferzeit-Hinweis, z. B. 30–45 Min.',s.del.eta)}${ip('del.area','Liefergebiet, z. B. Barmbek und Winterhude',s.del.area)}</div><h3>Am Tisch bestellen (QR)</h3>${cb('tisch.on','Bestellen am Tisch ist aktiv',s.tisch.on)}${ip('tn','Anzahl Tische',s.tn,{type:'number'})}<h3>Reservierung</h3>${ip('res.max','Max. Personen pro Online-Reservierung',s.res.max,{type:'number'})}<h3>Bewertungen</h3>${cb('rev.on','Zufriedene Gäste (4–5 Sterne) zu Google weiterleiten',s.rev.on)}${ip('rev.g','Google-Bewertungslink',s.rev.g,{full:1})}<h3>Startseite</h3>${cb('show.verbs','Abschnitt „So kommst du an deinen Burger“ zeigen',s.show.verbs)}${cb('show.gal','Fotos zeigen',s.show.gal)}${cb('show.rev','Bewertung auf der Startseite zeigen',s.show.rev)}</div>`;
  if(sTab==='mail')b=`<div class="card"><p>Damit Gäste beim <b>Bestätigen/Stornieren</b> von Reservierungen und beim <b>Annehmen/Ablehnen</b> von Lieferungen automatisch eine E-Mail bekommen, nutzt die Seite den kostenlosen Dienst <b>EmailJS</b> (200 E-Mails/Monat gratis).</p><p class="mu" style="margin:8px 0 14px">Im EmailJS-Template: An = <code>{{to_email}}</code>, Betreff = <code>{{subject}}</code>, Text = <code>{{message}}</code></p><div class="row">${ip('mail.pk','Public Key',s.mail.pk)}${ip('mail.sid','Service ID',s.mail.sid)}${ip('mail.tid','Template ID',s.mail.tid)}</div><label>Test-E-Mail an</label><input id="mtest" type="email" placeholder="deine@email.de"><button class="btn s o" onclick="testMail()">Test-E-Mail senden</button></div>`;
  if(sTab==='bot')b=`<div class="card">${cb('bot.on','Chatbot auf der Website zeigen',s.bot.on)}${ip('bot.hi','Begrüßung',s.bot.hi,{ta:1})}<h3>Eigene Fragen &amp; Antworten</h3><p class="mu">Stichwörter mit Komma trennen. Beispiel: „parkplatz, parken“ → „Parkplätze gibt es in der Seitenstraße.“</p>${s.bot.faq.map((f,i)=>`<div class="faq"><input value="${esc(f.k)}" placeholder="Stichwörter" oninput="SE.bot.faq[${i}].k=this.value"><textarea rows="2" placeholder="Antwort" oninput="SE.bot.faq[${i}].a=this.value">${esc(f.a)}</textarea><button class="btn s g" onclick="SE.bot.faq.splice(${i},1);render()">Löschen</button></div>`).join('')}<button class="btn s o" onclick="SE.bot.faq.push({k:'',a:''});render()">+ Frage hinzufügen</button></div>`;
  if(sTab==='design')b=`<div class="card"><label>Akzentfarbe (Buttons, Hervorhebungen)</label><div class="acts"><input type="color" value="${esc(s.accent)}" style="width:80px;height:50px;padding:4px" oninput="sv('accent',this.value);document.documentElement.style.setProperty('--accent',this.value)">${['#d92b63','#c22a7e','#d61a7f','#c8263f'].map(c=>`<button class="btn s" style="background:${c}" onclick="sv('accent','${c}');render()">${c}</button>`).join('')}</div></div>`;
