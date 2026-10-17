@@ -492,6 +492,17 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .rdy{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--gold);color:#120f0a;border-radius:16px;padding:12px 12px 12px 16px;font-size:15px;box-shadow:0 14px 40px rgba(0,0,0,.6);animation:rdy 1s ease-in-out 3}
 .rdy button{border:0;border-radius:99px;background:#120f0a;color:var(--gold2);font-weight:700;padding:10px 14px;cursor:pointer;flex:none}
 @keyframes rdy{50%{transform:scale(1.03)}}
+
+/* ===== Boss Club Admin ===== */
+.lst{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}.lst .card{padding:14px}.lst small{display:block;color:var(--mu);font-size:12px}.lst b{font-family:var(--f-serif);font-size:26px;color:var(--gold2)}
+.lbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.lbar input{flex:1 1 200px;margin:0!important}.lbar select{flex:0 0 auto;width:auto;margin:0!important}
+.llist{display:grid;gap:8px}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--bd);background:var(--gl);color:var(--ink);cursor:pointer;font:inherit}.lrow:hover{border-color:var(--gold)}
+.lrow .ln{flex:1;min-width:0}.lrow .ln b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lrow .ln small{color:var(--mu);font-size:13px}
+.lrow .lp{text-align:right;font:700 22px/1 var(--f-serif);color:var(--ink)}.lrow .lp small{display:block;font:500 11px var(--f-sans);color:var(--mu);margin-top:3px}.lrow .lp.lpok{color:var(--gold2)}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lbig{font:700 40px/1 var(--f-serif)}
+.ladj{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ladj .btn{justify-content:center;min-height:48px;font-size:16px}
+@media(max-width:700px){.lgrid{grid-template-columns:1fr}.lst b{font-size:22px}.lbar select{flex:1}}
 /* ===== POS ===== */
 .pos{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr);gap:18px;align-items:start}
 .posl,.pr2{min-width:0}
@@ -720,7 +731,7 @@ function startPublic(){
  if(FB.watchSite)FB.watchSite(d=>{S=deep(clone(SD),d||{});applyTheme();renderChrome();soft()});
  FB.watchImages(m=>{db.im=m;rem.im=Object.assign({},m);soft()});
  if(!staff)FB.watchReviews(false,L=>{db.v=L.sort((a,b)=>a.id-b.id);soft()})}
-function startStaff(){let first=true;FB.watchOrders(L=>{db.o=L.sort((a,b)=>a.t-b.t);rem.o={};db.o.forEach(o=>rem.o[o.id]=jx(o));if(first){first=false;nn=neuN()}else chk();watchReady();soft()});if(FB.watchDoc&&role==='admin')FB.watchDoc('config','kasse',d=>{KS=Object.assign({last:0,nr:0,h:[]},d||{});soft()});if(role==='admin'){FB.watchRes(L=>{db.r=L;rem.r={};L.forEach(o=>rem.r[o.id]=jx(o));soft()});FB.watchReviews(true,L=>{db.v=L.sort((a,b)=>a.id-b.id);rem.v={};L.forEach(o=>rem.v[o.id]=jx(o));soft()})}}
+function startStaff(){let first=true;FB.watchOrders(L=>{db.o=L.sort((a,b)=>a.t-b.t);rem.o={};db.o.forEach(o=>rem.o[o.id]=jx(o));if(first){first=false;nn=neuN()}else chk();watchReady();soft()});if(FB.watchDoc&&role==='admin')FB.watchDoc('config','kasse',d=>{KS=Object.assign({last:0,nr:0,h:[]},d||{});soft()});if(role==='admin'&&FB.watchLoy){FB.watchLoy(L=>{LOY=L;LOYerr=0;soft()},()=>{LOYerr=1;soft()})}if(role==='admin'){FB.watchRes(L=>{db.r=L;rem.r={};L.forEach(o=>rem.r[o.id]=jx(o));soft()});FB.watchReviews(true,L=>{db.v=L.sort((a,b)=>a.id-b.id);rem.v={};L.forEach(o=>rem.v[o.id]=jx(o));soft()})}}
 function initFB(){if(FBon)return;FBon=true;db={o:[],r:[],v:[],off:{},pr:{},x:[],im:{},ed:{}};nn=0;startPublic();FB.onAuth(em=>{const e=(em||'').toLowerCase();const RS=ROLES_OF(e);if(em&&!RS.length){FB.logout();return}
 if(em){if(selRole&&!RS.includes(selRole))toast('Dieses Konto darf nicht als '+ROLE_N[selRole]+' arbeiten – angemeldet als '+ROLE_N[RS[0]],1);staff=true;adm=true;role=RS.includes(selRole)?selRole:RS[0];at=myTabs()[0];startStaff()}
 else{staff=false;adm=false;role=null;FB.stopStaff();db.o=[];db.r=[];rem={o:{},r:{},v:{},cfg:rem.cfg,im:rem.im};FB.watchReviews(false,L=>{db.v=L.sort((a,b)=>a.id-b.id);soft()})}render()})}
@@ -1015,13 +1026,13 @@ async function resv(){const err=$('#rerr');fieldErr(['rn','rt']);const e=v('re')
 /* ---------- Bewertungen ---------- */
 let vs=0,vstep=0;
 const STARS=n=>[1,2,3,4,5].map(i=>`<button type="button" role="radio" aria-checked="${i===n}" aria-label="${i} ${i>1?'Sterne':'Stern'}" class="${i<=n?'on':''}" onclick="pickStar(${i})">★</button>`).join(''); // taste-skill-ignore: rating stars
-function pickStar(n){vs=n;vstep=1;render()}
+function pickStar(n){vs=n;const g=S.rev&&S.rev.on&&S.rev.g;if(n>=4&&g){render();setTimeout(()=>{vs=0;vstep=0;try{location.href=g}catch(e){}},180);return}vstep=1;render()}
 function RevBox(){const g=S.rev&&S.rev.on&&S.rev.g;
  if(!vstep)return `<div class="panel" data-r><h2>Wie war’s bei uns?</h2><p class="note" style="margin:0 0 6px">Tippe auf die Sterne.</p><div class="starp big" role="radiogroup" aria-label="Sterne">${STARS(vs)}</div></div>`;
- if(vstep===2)return `<div class="panel" data-r><h2>Danke für dein Feedback!</h2><p>Wir lesen jede Nachricht und melden uns, wenn du Kontaktdaten angegeben hast.</p>${g?`<p class="note">Möchtest du uns zusätzlich öffentlich bewerten? <a class="lk" href="${esc(g)}" target="_blank" rel="noopener">Auf Google bewerten</a></p>`:''}<button class="b ghost full" onclick="vs=0;vstep=0;render()">Fertig</button></div>`;
+ if(vstep===2)return `<div class="panel" data-r><h2>Danke für dein Feedback!</h2><p>Wir lesen jede Nachricht und melden uns, wenn du Kontaktdaten angegeben hast.</p><button class="b ghost full" onclick="vs=0;vstep=0;render()">Fertig</button></div>`;
  if(vs>=4&&g)return `<div class="panel" data-r><div class="starp big">${STARS(vs)}</div><h2 style="margin-top:14px">Das freut uns riesig!</h2><p>Würdest du das auch auf Google teilen? Das dauert eine Minute und hilft uns sehr.</p><a class="b full" style="margin-top:18px" href="${esc(g)}" target="_blank" rel="noopener" onclick="vstep=2;setTimeout(render,400)">Auf Google bewerten</a><button class="lk" style="margin-top:14px" onclick="vstep=3;render()">Lieber hier auf der Website schreiben</button></div>`;
  const fb=vs<=3;
- return `<form class="panel" data-r data-act="rate" onsubmit="event.preventDefault()" novalidate><div class="starp big">${STARS(vs)}</div><h2 style="margin-top:14px">${fb?'Das tut uns leid. Was können wir besser machen?':'Erzähl uns mehr'}</h2>${fb?'<p class="note">Deine Nachricht geht direkt an unser Team und wird nicht veröffentlicht.</p>':''}${fv('vn','Name',{a:'autocomplete="given-name"'})}<label class="f">${fb?'Was ist passiert?':'Deine Meinung'}<textarea id="vt" rows="4"></textarea></label>${fb?fv('vk','Telefon oder E-Mail, falls wir uns melden dürfen',{opt:1}):''}<p class="err" id="verr" role="alert"></p><button class="b full">${fb?'Feedback senden':'Bewertung senden'}</button>${fb&&g?`<p class="note">Du möchtest lieber öffentlich bewerten? <a class="lk" href="${esc(g)}" target="_blank" rel="noopener">Auf Google bewerten</a></p>`:''}</form>`}
+ return `<form class="panel" data-r data-act="rate" onsubmit="event.preventDefault()" novalidate><div class="starp big">${STARS(vs)}</div><h2 style="margin-top:14px">${fb?'Das tut uns leid. Was können wir besser machen?':'Erzähl uns mehr'}</h2>${fv('vn','Name',{a:'autocomplete="given-name"'})}<label class="f">${fb?'Was ist passiert?':'Deine Meinung'}<textarea id="vt" rows="4"></textarea></label>${fb?fv('vk','Telefon oder E-Mail, falls wir uns melden dürfen',{opt:1}):''}<p class="err" id="verr" role="alert"></p><button class="b full">${fb?'Feedback senden':'Bewertung senden'}</button></form>`}
 function Rev(){const L=db.v.filter(x=>x.a&&!x.fb);return `<div class="pg"><h1 data-r>Bewertungen</h1><p class="intro" data-r>${L.length?`Das sagen unsere Gäste.`:'Sag uns, wie es dir geschmeckt hat.'}</p><div class="two">${RevBox()}<div>${L.slice().reverse().map(x=>`<div class="rv" data-r><span class="st" aria-label="${x.s} von 5 Sternen">${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span><blockquote>„${esc(x.t)}“</blockquote><span class="who">${esc(x.n)}</span></div>`).join('')}</div></div></div>`} // taste-skill-ignore: rating stars
 async function rate(){const fb=vs<=3;if(!v('vn').trim()||!v('vt').trim()){$('#verr').textContent='Bitte Name und Text ausfüllen.';return}const x={id:Date.now(),n:v('vn').trim(),s:vs,t:v('vt').trim(),a:0};if(fb){x.fb=1;x.k=v('vk').trim()}
  if(FBon&&!staff){try{await FB.put('reviews',x.id,x)}catch(e){$('#verr').textContent='Konnte nicht gesendet werden. Bitte später erneut versuchen.';return}}else{db.v.push(x);save()}ofm={};vstep=2;if(!fb)toast('Danke! Deine Bewertung erscheint nach der Freischaltung.');render();top0()}
@@ -1040,8 +1051,8 @@ const KELLNER_EM='kellner@burgerboss.de';
 const ROLE_N={admin:'Admin',kellner:'Kellner',kueche:'Küche'};
 const ROLES_OF=e=>e===ADMIN_EM?['admin','kellner','kueche']:e===KITCHEN_EM?['kueche','kellner']:e===KELLNER_EM?['kellner']:[];
 let selRole=(()=>{try{return sessionStorage.getItem('bbRole')||''}catch(e){return ''}})();
-const TABS={kasse:'Kasse',tische:'Tische',kds:'Küche',online:'Online-Bestellungen',karte:'Speisekarte',res:'Reservierungen',stat:'Umsatz & Abschluss',rev:'Bewertungen',site:'Website',qr:'QR-Codes'};
-const AIC={kasse:'🧾',tische:'🍽',kds:'👨‍🍳',online:'🛵',karte:'📋',res:'📅',stat:'📊',rev:'⭐',site:'🛠',qr:'🔳'};
+const TABS={kasse:'Kasse',tische:'Tische',kds:'Küche',online:'Online-Bestellungen',karte:'Speisekarte',res:'Reservierungen',club:'Boss Club (Punkte)',stat:'Umsatz & Abschluss',rev:'Bewertungen',site:'Website',qr:'QR-Codes'};
+const AIC={club:'💎',kasse:'🧾',tische:'🍽',kds:'👨‍🍳',online:'🛵',karte:'📋',res:'📅',stat:'📊',rev:'⭐',site:'🛠',qr:'🔳'};
 const TABS_OF={admin:Object.keys(TABS),kellner:['tische','kasse'],kueche:['kds']};
 const myTabs=()=>TABS_OF[role]||[];
 const onlineOpen=()=>db.o.filter(o=>o.src==='Online'&&o.st==='neu').length;
@@ -1053,13 +1064,46 @@ function Admin(){if(!adm){
   if(!lstep)return `<div class="w lw"><h2>Personal-Bereich</h2><p class="mu">Wer bist du?</p><div class="roles">${Object.entries(ROLE_N).map(([k,n])=>`<button class="role" onclick="lstep='${k}';render()"><span>${{admin:'👔',kellner:'🍽',kueche:'👨‍🍳'}[k]}</span><b>${n}</b><small>${{admin:'Alles: Kasse, Umsatz, Website',kellner:'Tische, Bestellungen, Rechnungen',kueche:'Küchenmonitor'}[k]}</small></button>`).join('')}</div><p style="margin-top:20px"><a href="#home" class="mu">← Zur Website</a></p></div>`;
   return `<div class="w lw"><button class="btn g s" onclick="lstep=null;render()">← Andere Rolle</button><h2 style="margin-top:14px">Anmelden als ${ROLE_N[lstep]}</h2><div class="card" data-act="login"><label for="lu">E-Mail</label><input id="lu" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')$('#lp').focus()"><label for="lp">Passwort</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><button class="btn" style="width:100%;justify-content:center;min-height:50px" onclick="login()">Anmelden</button></div></div>`}
  if(!myTabs().includes(at))at=myTabs()[0];
- return `<div class="w"><h2>${TABS[at]}</h2>${{kasse:Kasse,tische:Tische,kds:Kds,online:Online,karte:Karte,res:ResA,stat:Stat,rev:RevA,site:Site,qr:QR}[at]()}</div>`}
+ return `<div class="w"><h2>${TABS[at]}</h2>${{kasse:Kasse,tische:Tische,kds:Kds,online:Online,karte:Karte,res:ResA,club:ClubA,stat:Stat,rev:RevA,site:Site,qr:QR}[at]()}</div>`}
 const ALIAS={kueche:KITCHEN_EM,'küche':KITCHEN_EM,admin:ADMIN_EM,kellner:KELLNER_EM};
 let logging=false;
 async function login(){if(logging)return;const raw=v('lu').trim().toLowerCase(),em=ALIAS[raw]||raw;if(!FBon){toast('Keine Verbindung zum Server. Bitte Internet prüfen und Seite neu laden.',1);return}if(!em||!v('lp')){toast('Bitte E-Mail und Passwort eingeben.',1);return}
  selRole=lstep||'admin';try{sessionStorage.setItem('bbRole',selRole)}catch(e){}
  unlockAudio();askNotify();logging=true;try{await FB.login(em,v('lp'));unlockAudio()}catch(e){toast('E-Mail oder Passwort falsch.',1)}logging=false}
 function logout(){lstep=null;try{sessionStorage.removeItem('bbRole')}catch(e){}if(FBon)FB.logout();else{adm=false;role=null;render()}}
+
+/* ---- Boss Club (Admin) ---- */
+let LOY=null,LOYerr=0,lq='',lsel=null,lnew=false,lsort='p';
+const fmtTel=k=>k.startsWith('49')?'+'+k:k.startsWith('0')?k:'0'+k;
+const lOrders=k=>db.o.filter(o=>o.pts&&o.pts.k===k).sort((a,b)=>b.t-a.t);
+async function lSave(k,d,msg){try{if(FBon)await FB.put('loyalty',k,d);else{db.loy=db.loy||{};db.loy[k]=d;save();LOY=Object.entries(db.loy).map(([k,v])=>Object.assign({k},v))}toast(msg||'Gespeichert');render()}catch(e){console.warn(e);toast('Speichern fehlgeschlagen (Firebase-Regeln für „loyalty“ prüfen)',1)}}
+function lAdj(k,d){const c=(LOY||[]).find(x=>x.k===k);if(!c)return;const n=Math.max(0,(+c.p||0)+d);lSave(k,{p:n,n:c.n||'',t:Date.now()},(d>0?'+':'')+d+' Punkte → '+n)}
+function lSet(k){const c=(LOY||[]).find(x=>x.k===k);if(!c)return;const p=Math.max(0,Math.round(+v('lp_e')||0)),n=v('ln_e').trim(),nk=ptsKey(v('lt_e'));if(!nk){toast('Telefonnummer ungültig',1);return}
+ if(nk!==k){if((LOY||[]).some(x=>x.k===nk)){toast('Diese Nummer gibt es schon',1);return}lSave(nk,{p,n,t:Date.now()},'Kunde gespeichert').then(()=>{lDel(k,1);lsel=nk})}else lSave(k,{p,n,t:Date.now()},'Kunde gespeichert')}
+async function lDel(k,silent){if(!silent&&!confirm('Kunde und alle Punkte wirklich löschen?'))return;try{if(FBon)await FB.del('loyalty',k);else{delete db.loy[k];save();LOY=Object.entries(db.loy).map(([k,v])=>Object.assign({k},v))}if(!silent){toast('Kunde gelöscht');lsel=null;render()}}catch(e){toast('Löschen fehlgeschlagen',1)}}
+function lAdd(){const k=ptsKey(v('lt_n')),n=v('ln_n').trim(),p=Math.max(0,Math.round(+v('lp_n')||0));if(!k){toast('Bitte eine gültige Telefonnummer eingeben',1);return}if((LOY||[]).some(x=>x.k===k)){toast('Diese Nummer gibt es schon',1);return}lnew=false;lSave(k,{p,n,t:Date.now()},'Kunde angelegt')}
+async function lCfg(){if(!SE)SE=clone(S);SE.pts={on:$('#pc_on').checked,per:+v('pc_per')||1,need:Math.max(1,+v('pc_need')||100),eur:+v('pc_eur')||0};await saveSite();SE=null;render()}
+function ClubA(){if(!FBon&&!LOY){db.loy=db.loy||{};LOY=Object.entries(db.loy).map(([k,v])=>Object.assign({k},v))}
+ if(LOYerr)return `<div class="card"><p><b>Die Punkte-Liste kann nicht geladen werden.</b></p><p class="mu">Die Firebase-Regeln erlauben dem Admin noch nicht, alle Kunden zu lesen. Schreib mir kurz, dann schicke ich dir die neuen Regeln.</p></div>`;
+ if(!LOY)return '<p class="mu">Lade Kunden …</p>';
+ const P=S.pts,all=LOY.slice(),tot=all.reduce((s,c)=>s+(+c.p||0),0),ready=all.filter(c=>(+c.p||0)>=P.need).length;
+ if(lsel){const c=all.find(x=>x.k===lsel);if(!c){lsel=null}else{const os=lOrders(c.k),sum=os.reduce((s,o)=>s+(o.total||0),0);
+  return `<div class="thd"><button class="btn g s" onclick="lsel=null;render()">← Alle Kunden</button><b>${esc(c.n||'Ohne Namen')}</b></div>
+  <div class="lgrid"><div class="card"><div class="lbig"><span class="gold">${+c.p||0}</span> Punkte</div><p class="mu" style="margin:4px 0 12px">${(+c.p||0)>=P.need?`✅ Kann ${eur(P.eur)} Rabatt einlösen`:`Noch ${P.need-(+c.p||0)} Punkte bis ${eur(P.eur)} Rabatt`}</p>
+  <div class="ladj">${[-P.need,-10,-1,1,10,50].map(d=>`<button class="btn ${d<0?'g':'o'}" onclick="lAdj('${c.k}',${d})">${d>0?'+':'−'}${Math.abs(d)}</button>`).join('')}</div>
+  ${(+c.p||0)>=P.need?`<button class="btn" style="width:100%;justify-content:center;margin-top:10px;min-height:48px" onclick="lAdj('${c.k}',-${P.need})">🎁 Rabatt einlösen (−${P.need} Punkte)</button>`:''}</div>
+  <div class="card"><h3 style="margin-top:0">Bearbeiten</h3><label>Name</label><input id="ln_e" value="${esc(c.n||'')}"><label>Telefon</label><input id="lt_e" type="tel" value="${esc(fmtTel(c.k))}"><label>Punkte</label><input id="lp_e" type="number" inputmode="numeric" min="0" value="${+c.p||0}">
+  <div class="acts"><button class="btn" onclick="lSet('${c.k}')">Speichern</button><a class="btn o" href="tel:${fmtTel(c.k)}">📞 Anrufen</a><a class="btn o" href="https://wa.me/${c.k.startsWith('0')?'49'+c.k.slice(1):c.k}" target="_blank" rel="noopener">WhatsApp</a><button class="btn g" onclick="lDel('${c.k}')">Löschen</button></div></div></div>
+  <h3>Bestellungen mit Punkten</h3><p class="mu">${os.length} Bestellungen · ${eur(sum)} Umsatz · zuletzt aktiv ${c.t?new Date(c.t).toLocaleDateString('de-DE'):'–'}</p>
+  ${os.length?`<div class="card">${os.slice(0,30).map(o=>`<div class="it"><div class="d"><b>#${o.id} · ${new Date(o.t).toLocaleDateString('de-DE')} ${tm(o.t)}</b><small>${esc(o.src||'')} · ${esc(o.mode||'')}${o.pts&&o.pts.earn?` · +${o.pts.earn} P.`:''}${o.pts&&o.pts.red?` · −${o.pts.red} P. eingelöst`:''}</small></div><span class="pr">${eur(o.total||0)}</span></div>`).join('')}</div>`:'<p class="mu">Keine Bestellungen gefunden (nur die letzten 500 Bestellungen werden angezeigt).</p>'}`}}
+ const q=lq.trim().toLowerCase(),qd=q.replace(/\D/g,'');
+ let L=all.filter(c=>!q||(c.n||'').toLowerCase().includes(q)||(qd&&c.k.includes(qd.replace(/^0/,''))));
+ L.sort(lsort==='n'?(a,b)=>(a.n||'').localeCompare(b.n||''):lsort==='t'?(a,b)=>(b.t||0)-(a.t||0):(a,b)=>(+b.p||0)-(+a.p||0));
+ return `<div class="lst"><div class="card"><small>Kunden</small><b>${all.length}</b></div><div class="card"><small>Punkte gesamt</small><b>${tot}</b></div><div class="card"><small>Rabatt bereit</small><b>${ready}</b></div></div>
+ <div class="lbar"><input type="search" id="lq" placeholder="Name oder Telefon suchen …" value="${esc(lq)}" oninput="lq=this.value;clearTimeout(window._lqt);window._lqt=setTimeout(()=>{const p=this.selectionStart;render();const i=$('#lq');i&&(i.focus(),i.setSelectionRange(p,p))},250)"><select onchange="lsort=this.value;render()"><option value="p" ${lsort==='p'?'selected':''}>Meiste Punkte</option><option value="t" ${lsort==='t'?'selected':''}>Zuletzt aktiv</option><option value="n" ${lsort==='n'?'selected':''}>Name A–Z</option></select><button class="btn" onclick="lnew=!lnew;render()">+ Kunde</button></div>
+ ${lnew?`<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Neuer Kunde</h3><div class="row"><div><label>Name</label><input id="ln_n"></div><div><label>Telefon</label><input id="lt_n" type="tel"></div><div><label>Start-Punkte</label><input id="lp_n" type="number" inputmode="numeric" value="0" min="0"></div></div><div class="acts"><button class="btn" onclick="lAdd()">Anlegen</button><button class="btn g" onclick="lnew=false;render()">Abbrechen</button></div></div>`:''}
+ <div class="llist">${L.map(c=>`<button class="lrow" onclick="lsel='${c.k}';render()"><span class="ln"><b>${esc(c.n||'Ohne Namen')}</b><small>${esc(fmtTel(c.k))}${c.t?' · '+new Date(c.t).toLocaleDateString('de-DE'):''}</small></span><span class="lp ${(+c.p||0)>=P.need?'lpok':''}">${+c.p||0}<small>Punkte</small></span></button>`).join('')||'<p class="mu" style="padding:14px">Noch keine Kunden.</p>'}</div>
+ <h3>Einstellungen</h3><div class="card"><label style="display:flex;gap:10px;align-items:center;font-size:15px;color:#fff;margin:4px 0 12px"><input type="checkbox" id="pc_on" style="width:22px;height:22px;margin:0" ${P.on?'checked':''}> Boss Club ist aktiv</label><div class="row"><div><label>Punkte pro 1 €</label><input id="pc_per" type="number" step="0.5" min="0" value="${+P.per||1}"></div><div><label>Punkte für Rabatt</label><input id="pc_need" type="number" min="1" value="${+P.need||100}"></div><div><label>Rabatt in €</label><input id="pc_eur" type="number" step="0.5" min="0" value="${+P.eur||0}"></div></div><button class="btn" onclick="lCfg()">Einstellungen speichern</button></div>`}
 /* ---- Ton ---- */
 let AC=null;function unlockAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}}
 function tone(seq){try{unlockAudio();let t=AC.currentTime;seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.3,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.05);t+=d*.9})}catch(e){}}
@@ -1323,7 +1367,8 @@ window.FB={ok:true,
  watchReviews:(all,cb)=>{unsub(all?'rvp':'rva');sub(all?'rva':'rvp',()=>S.onSnapshot(all?S.collection(fs,'reviews'):S.query(S.collection(fs,'reviews'),S.where('a','==',1)),s=>cb(s.docs.map(d=>d.data())),err('reviews')))},
  watchOrders:cb=>sub('ord',()=>S.onSnapshot(S.query(S.collection(fs,'orders'),S.orderBy('t','desc'),S.limit(500)),s=>cb(s.docs.map(d=>d.data())),err('orders'))),
  watchRes:cb=>sub('res',()=>S.onSnapshot(S.collection(fs,'reservations'),s=>cb(s.docs.map(d=>d.data())),err('res'))),
- stopStaff:()=>{['ord','res','rva'].forEach(unsub)}
+ watchLoy:(cb,eb)=>sub('loy',()=>S.onSnapshot(S.collection(fs,'loyalty'),s=>cb(s.docs.map(d=>Object.assign({k:d.id},d.data()))),e=>{console.warn('Firestore loyalty',e);eb&&eb(e)})),
+ stopStaff:()=>{['ord','res','rva','loy'].forEach(unsub)}
 };
 dispatchEvent(new Event('fbready'));
 }).catch(e=>{console.info('Offline-Modus: Firebase nicht erreichbar');window.FBfail=1;dispatchEvent(new Event('fbfail'))});
