@@ -613,6 +613,10 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 @media (prefers-reduced-motion:reduce){.abc.f{animation:none}}
 .abn{font-size:44px;font-weight:900;line-height:1}.abc.f .abn{color:#2fd16b}.abi{margin:6px 0 12px;font-weight:600}.abi small{opacity:.7;font-weight:400}
 .aba{display:flex;gap:8px;flex-wrap:wrap}.aba .btn{flex:1;justify-content:center;min-height:48px}
+#ready .rdy{padding:6px 6px 6px 12px;font-size:14px;gap:6px;border-radius:14px}
+#ready .rdy span{flex:1;min-width:0;line-height:1.25}
+#ready .rdy button{padding:8px 11px;font-size:13px}
+#ready .rdy .rdx{background:rgba(0,0,0,.18);color:#120f0a;width:34px;height:34px;padding:0;font-size:16px}
 /* ---- Beleg: kräftige, gut lesbare Schrift für Thermodrucker ---- */
 #bonp{font:700 14px/1.45 Arial,Helvetica,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-font-smoothing:none}
 #bonp *{color:#000!important;opacity:1!important}
@@ -1160,8 +1164,8 @@ function askNotify(){try{if('Notification' in window&&Notification.permission===
 function testAlert(){unlockAudio();askNotify();readyTone();toast('🔔 Ton-Test – hörst du den Ton? Wenn nicht: Lautstärke und Tab-Ton prüfen');setTimeout(()=>{try{if('Notification' in window&&Notification.permission==='granted')new Notification('Burger Boss',{body:'Benachrichtigungen funktionieren ✅',icon:IMG.icon})}catch(e){}},600)}
 function watchReady(){const m={};db.o.forEach(o=>m[o.id]=o.st);if(seenSt&&adm&&(role==='kellner'||role==='admin')){const nw=db.o.filter(o=>o.st==='fertig'&&seenSt[o.id]&&seenSt[o.id]!=='fertig'&&(o.tb||o.pg||role==='admin'));if(nw.length){readyTone();if(navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}nw.forEach(o=>notify('🔔 '+whoO(o)+' ist fertig','Bestellung #'+o.id+' bitte abholen'))}}seenSt=m;renderReady()}
 function renderReady(){let r=$('#ready');if(!r){r=document.createElement('div');r.id='ready';r.setAttribute('role','status');r.setAttribute('aria-live','assertive');document.body.appendChild(r)}
- const L=adm&&(role==='kellner'||role==='admin')&&route()==='admin'?readyB():[];r.hidden=!L.length;
- r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 ${o.pg?`<b>#${o.id}</b> ist fertig${o.name?' · '+esc(o.name):''} – Kunde rufen`:`<b>${esc(whoO(o))}</b> · #${o.id} ist fertig – bitte abholen`}</span>${o.pg?`<button onclick="pgCall(${o.id})">📣 ${o.call?'Nochmal rufen':'Kunde rufen'}</button>`:''}<button onclick="served(${o.id})">Abgeholt</button></div>`).join('')}
+ const L=adm&&(role==='kellner'||role==='admin')&&route()==='admin'&&at!=='abh'?readyB().filter(o=>!rdyX.has(o.id)).slice(-2):[];r.hidden=!L.length;
+ r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 ${o.pg?`<b>#${o.id}</b> fertig${o.name?' · '+esc(o.name):''}`:`<b>${esc(whoO(o))}</b> · #${o.id} ist fertig – bitte abholen`}</span>${o.pg?`<button onclick="pgCall(${o.id})">📣 ${o.call?'Nochmal rufen':'Kunde rufen'}</button>`:''}<button onclick="served(${o.id})">Abgeholt</button><button class="rdx" onclick="rdyX.add(${o.id});renderReady()" aria-label="Hinweis schließen">✕</button></div>`).join('')}
 function served(id){const o=db.o.find(x=>x.id===id);if(!o)return;o.st='done';save();renderReady();if(route()==='admin')render()}
 /* ---- Abhol-Pager (statt Piepser) ---- */
 const T0=document.title;
@@ -1209,6 +1213,7 @@ async function pgLock(){try{if('wakeLock' in navigator&&!pgWL&&document.visibili
 async function pgStart(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}unlockAudio();pgOn=true;tone([[988,.15],[1319,.25]]);try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}await pgLock();pgPaint();pgCheck()}
 function pgTest(){unlockAudio();readyTone();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&PGK&&pgOn){unlockAudio();pgLock()}});
+const rdyX=new Set();
 const pgWait=()=>db.o.filter(o=>o.pg&&o.st==='fertig'&&!o.call);
 const readyB=()=>db.o.filter(o=>o.st==='fertig'&&(o.tb||(o.pg?!o.call:role==='admin')));
 function Abholung(){const now=Date.now(),A=db.o.filter(o=>o.pg&&o.st!=='done'&&o.st!=='x'&&!(o.src==='Online'&&o.st==='neu')&&now-o.t<864e5),
