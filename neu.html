@@ -605,6 +605,14 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .pgcta{margin-top:18px;padding:14px;border:1px solid var(--accent,#c9a45c);border-radius:14px}
 .pgq{display:flex;gap:12px;align-items:center;text-align:left;margin:10px 0;padding:10px;border:1px dashed currentColor;border-radius:12px}
 .pgq img{background:#fff;padding:6px;border-radius:8px;width:140px;height:140px;flex:none}.pgq small{display:block;opacity:.75;margin-top:4px}
+.abh{display:flex;align-items:center;gap:8px;margin:18px 0 10px}.abh span{background:var(--surface3,#333);border-radius:99px;padding:1px 10px;font-size:14px}
+.abg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.abc{border:2px solid #ff9a1f;border-radius:16px;padding:14px;background:var(--surface,#111)}
+.abc.f{border-color:#2fd16b;animation:abp 1.2s infinite alternate}.abc.g{border-color:var(--accent,#c9a45c)}
+@keyframes abp{from{box-shadow:0 0 0 0 rgba(47,209,107,0)}to{box-shadow:0 0 0 4px rgba(47,209,107,.35)}}
+@media (prefers-reduced-motion:reduce){.abc.f{animation:none}}
+.abn{font-size:44px;font-weight:900;line-height:1}.abc.f .abn{color:#2fd16b}.abi{margin:6px 0 12px;font-weight:600}.abi small{opacity:.7;font-weight:400}
+.aba{display:flex;gap:8px;flex-wrap:wrap}.aba .btn{flex:1;justify-content:center;min-height:48px}
 /* ---- Beleg: kräftige, gut lesbare Schrift für Thermodrucker ---- */
 #bonp{font:700 14px/1.45 Arial,Helvetica,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-font-smoothing:none}
 #bonp *{color:#000!important;opacity:1!important}
@@ -1086,20 +1094,20 @@ const KELLNER_EM='kellner@burgerboss.de';
 const ROLE_N={admin:'Admin',kellner:'Kellner',kueche:'Küche'};
 const ROLES_OF=e=>e===ADMIN_EM?['admin','kellner','kueche']:e===KITCHEN_EM?['kueche','kellner']:e===KELLNER_EM?['kellner']:[];
 let selRole=(()=>{try{return sessionStorage.getItem('bbRole')||''}catch(e){return ''}})();
-const TABS={kasse:'Kasse',tische:'Tische',kds:'Küche',online:'Online-Bestellungen',karte:'Speisekarte',res:'Reservierungen',club:'Boss Club (Punkte)',stat:'Umsatz & Abschluss',rev:'Bewertungen',site:'Website',qr:'QR-Codes'};
-const AIC={club:'💎',kasse:'🧾',tische:'🍽',kds:'👨‍🍳',online:'🛵',karte:'📋',res:'📅',stat:'📊',rev:'⭐',site:'🛠',qr:'🔳'};
-const TABS_OF={admin:Object.keys(TABS),kellner:['tische','kasse'],kueche:['kds']};
+const TABS={kasse:'Kasse',abh:'Abholung',tische:'Tische',kds:'Küche',online:'Online-Bestellungen',karte:'Speisekarte',res:'Reservierungen',club:'Boss Club (Punkte)',stat:'Umsatz & Abschluss',rev:'Bewertungen',site:'Website',qr:'QR-Codes'};
+const AIC={abh:'📣',club:'💎',kasse:'🧾',tische:'🍽',kds:'👨‍🍳',online:'🛵',karte:'📋',res:'📅',stat:'📊',rev:'⭐',site:'🛠',qr:'🔳'};
+const TABS_OF={admin:Object.keys(TABS),kellner:['tische','kasse','abh'],kueche:['kds']};
 const myTabs=()=>TABS_OF[role]||[];
 const onlineOpen=()=>db.o.filter(o=>o.src==='Online'&&o.st==='neu').length;
 const readyL=()=>db.o.filter(o=>o.st==='fertig'&&(o.tb?true:role==='admin'));
 const whoO=o=>o.tb?'Tisch '+o.tb:o.mode==='Lieferung'?'Lieferung'+(o.name?' · '+o.name:''):'Abholung'+(o.name?' · '+o.name:'');
-function admDrawer(){return `<div class="dh"><img src="${IMG.wm}" alt="Burger Boss"><button class="x" onclick="adr(0)" aria-label="Menü schließen">✕</button></div><div class="dc">Angemeldet als <b>${ROLE_N[role]||''}</b></div>${myTabs().map(k=>`<a class="${at===k?'on':''}" onclick="at='${k}';tb=null;tv=null;tkOpen=false;render()">${AIC[k]} ${TABS[k]}${k==='kds'&&neuN()?` <b class="cnt">${neuN()}</b>`:''}${k==='online'&&onlineOpen()?` <b class="cnt">${onlineOpen()}</b>`:''}${k==='tische'&&readyL().length?` <b class="cnt">${readyL().length}</b>`:''}</a>`).join('')}<a onclick="testAlert()">🔔 Ton &amp; Benachrichtigung testen</a>${role==='admin'?'<a href="#home">🏠 Zur Website</a>':''}<a class="adm" onclick="logout()">🚪 Abmelden</a>`}
+function admDrawer(){return `<div class="dh"><img src="${IMG.wm}" alt="Burger Boss"><button class="x" onclick="adr(0)" aria-label="Menü schließen">✕</button></div><div class="dc">Angemeldet als <b>${ROLE_N[role]||''}</b></div>${myTabs().map(k=>`<a class="${at===k?'on':''}" onclick="at='${k}';tb=null;tv=null;tkOpen=false;render()">${AIC[k]} ${TABS[k]}${k==='kds'&&neuN()?` <b class="cnt">${neuN()}</b>`:''}${k==='online'&&onlineOpen()?` <b class="cnt">${onlineOpen()}</b>`:''}${k==='tische'&&readyL().filter(o=>o.tb).length?` <b class="cnt">${readyL().filter(o=>o.tb).length}</b>`:''}${k==='abh'&&pgWait().length?` <b class="cnt">${pgWait().length}</b>`:''}</a>`).join('')}<a onclick="testAlert()">🔔 Ton &amp; Benachrichtigung testen</a>${role==='admin'?'<a href="#home">🏠 Zur Website</a>':''}<a class="adm" onclick="logout()">🚪 Abmelden</a>`}
 let lstep=null;
 function Admin(){if(!adm){
   if(!lstep)return `<div class="w lw"><h2>Personal-Bereich</h2><p class="mu">Wer bist du?</p><div class="roles">${Object.entries(ROLE_N).map(([k,n])=>`<button class="role" onclick="lstep='${k}';render()"><span>${{admin:'👔',kellner:'🍽',kueche:'👨‍🍳'}[k]}</span><b>${n}</b><small>${{admin:'Alles: Kasse, Umsatz, Website',kellner:'Tische, Bestellungen, Rechnungen',kueche:'Küchenmonitor'}[k]}</small></button>`).join('')}</div><p style="margin-top:20px"><a href="#home" class="mu">← Zur Website</a></p></div>`;
   return `<div class="w lw"><button class="btn g s" onclick="lstep=null;render()">← Andere Rolle</button><h2 style="margin-top:14px">Anmelden als ${ROLE_N[lstep]}</h2><div class="card" data-act="login"><label for="lu">E-Mail</label><input id="lu" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')$('#lp').focus()"><label for="lp">Passwort</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><button class="btn" style="width:100%;justify-content:center;min-height:50px" onclick="login()">Anmelden</button></div></div>`}
  if(!myTabs().includes(at))at=myTabs()[0];
- return `<div class="w"><h2>${TABS[at]}</h2>${{kasse:Kasse,tische:Tische,kds:Kds,online:Online,karte:Karte,res:ResA,club:ClubA,stat:Stat,rev:RevA,site:Site,qr:QR}[at]()}</div>`}
+ return `<div class="w"><h2>${TABS[at]}</h2>${{kasse:Kasse,abh:Abholung,tische:Tische,kds:Kds,online:Online,karte:Karte,res:ResA,club:ClubA,stat:Stat,rev:RevA,site:Site,qr:QR}[at]()}</div>`}
 const ALIAS={kueche:KITCHEN_EM,'küche':KITCHEN_EM,admin:ADMIN_EM,kellner:KELLNER_EM};
 let logging=false;
 async function login(){if(logging)return;const raw=v('lu').trim().toLowerCase(),em=ALIAS[raw]||raw;if(!FBon){toast('Keine Verbindung zum Server. Bitte Internet prüfen und Seite neu laden.',1);return}if(!em||!v('lp')){toast('Bitte E-Mail und Passwort eingeben.',1);return}
@@ -1150,10 +1158,10 @@ let seenSt=null;
 function notify(title,body){try{if('Notification' in window&&Notification.permission==='granted'&&(document.hidden||!document.hasFocus())){const n=new Notification(title,{body,icon:IMG.icon,tag:title,renotify:true});n.onclick=()=>{window.focus();n.close()}}}catch(e){}}
 function askNotify(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}}
 function testAlert(){unlockAudio();askNotify();readyTone();toast('🔔 Ton-Test – hörst du den Ton? Wenn nicht: Lautstärke und Tab-Ton prüfen');setTimeout(()=>{try{if('Notification' in window&&Notification.permission==='granted')new Notification('Burger Boss',{body:'Benachrichtigungen funktionieren ✅',icon:IMG.icon})}catch(e){}},600)}
-function watchReady(){const m={};db.o.forEach(o=>m[o.id]=o.st);if(seenSt&&adm&&(role==='kellner'||role==='admin')){const nw=db.o.filter(o=>o.st==='fertig'&&seenSt[o.id]&&seenSt[o.id]!=='fertig'&&(o.tb||role==='admin'));if(nw.length){readyTone();if(navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}nw.forEach(o=>notify('🔔 '+whoO(o)+' ist fertig','Bestellung #'+o.id+' bitte abholen'))}}seenSt=m;renderReady()}
+function watchReady(){const m={};db.o.forEach(o=>m[o.id]=o.st);if(seenSt&&adm&&(role==='kellner'||role==='admin')){const nw=db.o.filter(o=>o.st==='fertig'&&seenSt[o.id]&&seenSt[o.id]!=='fertig'&&(o.tb||o.pg||role==='admin'));if(nw.length){readyTone();if(navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}nw.forEach(o=>notify('🔔 '+whoO(o)+' ist fertig','Bestellung #'+o.id+' bitte abholen'))}}seenSt=m;renderReady()}
 function renderReady(){let r=$('#ready');if(!r){r=document.createElement('div');r.id='ready';r.setAttribute('role','status');r.setAttribute('aria-live','assertive');document.body.appendChild(r)}
- const L=adm&&(role==='kellner'||role==='admin')&&route()==='admin'?readyL():[];r.hidden=!L.length;
- r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 <b>${esc(whoO(o))}</b> · #${o.id} ist fertig – bitte abholen</span>${o.pg?`<button onclick="pgCall(${o.id})">📣 ${o.call?'Nochmal rufen':'Kunde rufen'}</button>`:''}<button onclick="served(${o.id})">Abgeholt</button></div>`).join('')}
+ const L=adm&&(role==='kellner'||role==='admin')&&route()==='admin'?readyB():[];r.hidden=!L.length;
+ r.innerHTML=L.map(o=>`<div class="rdy"><span>🔔 ${o.pg?`<b>#${o.id}</b> ist fertig${o.name?' · '+esc(o.name):''} – Kunde rufen`:`<b>${esc(whoO(o))}</b> · #${o.id} ist fertig – bitte abholen`}</span>${o.pg?`<button onclick="pgCall(${o.id})">📣 ${o.call?'Nochmal rufen':'Kunde rufen'}</button>`:''}<button onclick="served(${o.id})">Abgeholt</button></div>`).join('')}
 function served(id){const o=db.o.find(x=>x.id===id);if(!o)return;o.st='done';save();renderReady();if(route()==='admin')render()}
 /* ---- Abhol-Pager (statt Piepser) ---- */
 const T0=document.title;
@@ -1201,6 +1209,14 @@ async function pgLock(){try{if('wakeLock' in navigator&&!pgWL&&document.visibili
 async function pgStart(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}unlockAudio();pgOn=true;tone([[988,.15],[1319,.25]]);try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}await pgLock();pgPaint();pgCheck()}
 function pgTest(){unlockAudio();readyTone();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&PGK&&pgOn){unlockAudio();pgLock()}});
+const pgWait=()=>db.o.filter(o=>o.pg&&o.st==='fertig'&&!o.call);
+const readyB=()=>db.o.filter(o=>o.st==='fertig'&&(o.tb||(o.pg?!o.call:role==='admin')));
+function Abholung(){const now=Date.now(),A=db.o.filter(o=>o.pg&&o.st!=='done'&&o.st!=='x'&&!(o.src==='Online'&&o.st==='neu')&&now-o.t<864e5),
+ F=A.filter(o=>o.st==='fertig'&&!o.call).sort((a,b)=>a.t-b.t),G=A.filter(o=>o.call).sort((a,b)=>b.call-a.call),P=A.filter(o=>!o.call&&o.st!=='fertig').sort((a,b)=>a.t-b.t),
+ min=o=>Math.max(0,Math.round((now-o.t)/6e4)),
+ card=(o,k)=>`<div class="abc ${k}"><div class="abn">#${o.id}</div><div class="abi">${esc(o.mode||'')}${o.name?' · '+esc(o.name):''}<br><small>vor ${min(o)} Min.${o.call?' · gerufen '+tm(o.call):''}</small></div><div class="aba"><button class="btn ${k==='f'?'':'o'}" onclick="pgCall(${o.id})">📣 ${o.call?'Nochmal rufen':'Kunde rufen'}</button><button class="btn g" onclick="served(${o.id})">✓ Abgeholt</button></div></div>`,
+ sec=(t,L,k,e)=>`<h3 class="abh">${t} <span>${L.length}</span></h3>${L.length?`<div class="abg">${L.map(o=>card(o,k)).join('')}</div>`:`<p class="mu">${e}</p>`}`;
+ return `<p class="mu">Wenn die Küche „Fertig“ meldet, klingelt es hier. Tippe auf „Kunde rufen“ – dann klingelt das Handy des Gastes.</p>${sec('✅ Fertig – Kunde rufen',F,'f','Gerade nichts fertig.')}${sec('🔔 Gerufen – wartet auf Abholung',G,'g','Niemand wartet.')}${sec('⏳ In Zubereitung',P,'p','Keine Bestellungen in der Küche.')}`}
 /* ---- Punkte gutschreiben ---- */
 async function ptsCredit(o,tel){const k=ptsKey(tel||(o.pts&&o.pts.k)||o.tel||'');if(!S.pts.on||!k||(o.pts&&o.pts.done))return;
  const base=o.items.filter(l=>l.p>0&&l.n!=='Liefergebühr').reduce((s,l)=>s+l.p*l.q,0),earn=ptsEarn(base),red=(o.pts&&o.pts.red)||0;
@@ -1232,7 +1248,7 @@ function tQ(k,d){tk[k].q+=d;tk=tk.filter(x=>x.q>0);if(!tk.length)tkOpen=false;re
 function cashPad(tt,act){const g=+String(given).replace(',','.')||0;return `<div class="cash"><label for="cg">Gegeben (€)</label><input id="cg" inputmode="decimal" value="${esc(given)}" oninput="given=this.value;const g=+this.value.replace(',','.')||0;$('#rg').textContent=g>=${tt}?'Rückgeld: '+eur(g-${tt}):''"><div class="qk">${[...new Set([Math.ceil(tt),Math.ceil(tt/5)*5,Math.ceil(tt/10)*10,Math.ceil(tt/50)*50].filter(x=>x>0))].slice(0,4).map(x=>`<button onclick="given='${x}';render()">${eur(x)}</button>`).join('')}</div><p class="rg" id="rg">${g>=tt&&tt?'Rückgeld: '+eur(g-tt):''}</p></div>`}
 /* Kassenverkauf */
 let kasStep=null;
-function Kasse(){const can=tk.length>0;return posWrap(pgStrip()+tiles(),tt=>`<div class="seg">${['Vor Ort','Mitnehmen'].map(m=>`<button class="${posMode===m?'on':''}" onclick="posMode='${m}';render()">${m}</button>`).join('')}</div><input class="pin" placeholder="Name (optional)" value="${esc(cn)}" oninput="cn=this.value">${S.pts.on?`<input class="pin" type="tel" placeholder="Boss-Club Telefon (optional)" value="${esc(ptel)}" oninput="ptel=this.value">`:''}${kasStep==='bar'?cashPad(tt)+`<div class="pay2"><button class="btn g" onclick="kasStep=null;render()">Zurück</button><button class="btn big2" ${can?'':'disabled'} onclick="kSale('Bar')">Bar kassieren</button></div>`:`<div class="pay2"><button class="btn big2" ${can?'':'disabled'} onclick="kasStep='bar';render()">💶 Bar</button><button class="btn big2" ${can?'':'disabled'} onclick="kSale('Karte')">💳 Karte</button></div>`}`)}
+function Kasse(){const can=tk.length>0;return posWrap(tiles(),tt=>`<div class="seg">${['Vor Ort','Mitnehmen'].map(m=>`<button class="${posMode===m?'on':''}" onclick="posMode='${m}';render()">${m}</button>`).join('')}</div><input class="pin" placeholder="Name (optional)" value="${esc(cn)}" oninput="cn=this.value">${S.pts.on?`<input class="pin" type="tel" placeholder="Boss-Club Telefon (optional)" value="${esc(ptel)}" oninput="ptel=this.value">`:''}${kasStep==='bar'?cashPad(tt)+`<div class="pay2"><button class="btn g" onclick="kasStep=null;render()">Zurück</button><button class="btn big2" ${can?'':'disabled'} onclick="kSale('Bar')">Bar kassieren</button></div>`:`<div class="pay2"><button class="btn big2" ${can?'':'disabled'} onclick="kasStep='bar';render()">💶 Bar</button><button class="btn big2" ${can?'':'disabled'} onclick="kSale('Karte')">💳 Karte</button></div>`}`)}
 async function kSale(m){if(!tk.length)return;const tt=tkT(),g=+String(given).replace(',','.')||0;if(m==='Bar'&&g&&g<tt){toast('Gegeben ist weniger als der Betrag',1);return}
  const it=tk;tk=[];tkOpen=false;const o=await mk({src:'Kasse',mode:posMode,tb:null,name:cn.trim(),pay:m,paid:true,items:it});lastB=bonOf([o],m,null);lastB.pg=o.pg;lastB.pgn=o.id;if(m==='Bar'&&g)lastB.given=g;
  if(ptel.trim())await ptsCredit(o,ptel.trim());cn='';ptel='';given='';kasStep=null;render();askBon(lastB)}
