@@ -605,6 +605,13 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .pgcta{margin-top:18px;padding:14px;border:1px solid var(--accent,#c9a45c);border-radius:14px}
 .pgq{display:flex;gap:12px;align-items:center;text-align:left;margin:10px 0;padding:10px;border:1px dashed currentColor;border-radius:12px}
 .pgq img{background:#fff;padding:6px;border-radius:8px;width:140px;height:140px;flex:none}.pgq small{display:block;opacity:.75;margin-top:4px}
+/* ---- Beleg: kräftige, gut lesbare Schrift für Thermodrucker ---- */
+#bonp{font:700 14px/1.45 Arial,Helvetica,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-font-smoothing:none}
+#bonp *{color:#000!important;opacity:1!important}
+#bonp .bt{font-weight:900;font-size:19px}
+#bonp .in{font-size:13px;font-weight:700}
+#bonp hr{border-top:2px dashed #000}
+@media print{#bonp{font-size:15px;font-weight:700;padding:3mm 1mm}#bonp .bt{font-size:20px}#bonp .in{font-size:14px}}
 </style>
 </head><body>
 <a class="skip" href="#" onclick="event.preventDefault();document.querySelector('main').focus()">Zum Inhalt springen</a>
