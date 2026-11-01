@@ -578,6 +578,15 @@ body.hasbar .cbt{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 @media(min-width:520px) and (max-width:860px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .bonb:not(.cust) .cx{display:none!important}
 
+
+/* Kasse: Kategorien links untereinander (nur Computer) */
+.pgrid{display:block}
+@media(min-width:861px){
+ .pgrid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;align-items:start}
+ .pgrid .pcat{flex-direction:column;overflow:visible;padding:0}
+ .pgrid .pcat button{width:100%;text-align:left;white-space:normal;padding:10px 16px;line-height:1.25}
+ .pmain{min-width:0}
+}
 </style><style>
 /* ---- Abhol-Pager ---- */
 .pgs{margin:0 0 12px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface2,rgba(255,255,255,.03))}
@@ -1243,7 +1252,7 @@ const tkQ=n=>tk.filter(l=>l.n===n||l.n===n+' als Menü').reduce((s,l)=>s+l.q,0);
 function tkSheet(o){o=!!o&&tk.length>0;tkOpen=o;const p=$('.pos.sheet .pr2'),v=$('.tov');p&&p.classList.toggle('op',o);v&&v.classList.toggle('op',o);if(!o)tkEd=-1}
 function tkBar(){const n=tk.reduce((s,l)=>s+l.q,0);return `<div class="tov ${tkOpen&&n?'op':''}" onclick="tkSheet(0)"></div><button class="tbar" onclick="tkSheet(1)" ${n?'':'hidden'}><span class="n">${n}</span><span>Bon ansehen</span><b class="t">${eur(tkT())}</b></button>`}
 const posWrap=(left,foot)=>{if(!tk.length)tkOpen=false;return `<div class="pos sheet"><div class="posl">${left}</div><div class="pr2 ${tkOpen?'op':''}" role="dialog" aria-label="Bon">${ticket(foot)}</div></div>${tkBar()}`};
-function tiles(){const C=cats(),c=C[pc]||C[0];return `<div class="pcat">${C.map((x,k)=>`<button class="${pc===k?'on':''}" onclick="pc=${k};render()">${esc(x.c)}</button>`).join('')}</div>${c.b?`<button class="mtog ${pm?'on':''}" onclick="pm=!pm;render()" aria-pressed="${pm}">${pm?'✓ ':''}Als Menü (+${eur(MENU_ADD)}) – für den nächsten Burger</button>`:''}<div class="tiles">${c.it.map(x=>{const q=tkQ(x.n);return `<button class="tile ${x.off?'off':''} ${q?'has':''}" ${x.off?'disabled':''} onclick="tAdd('${x.i}')">${q?`<i class="qb">${q}</i>`:''}<b>${esc(x.n)}</b><span>${x.off?'Aus':eur(x.p)}</span></button>`}).join('')}</div>`}
+function tiles(){const C=cats(),c=C[pc]||C[0];return `<div class="pgrid"><div class="pcat">${C.map((x,k)=>`<button class="${pc===k?'on':''}" onclick="pc=${k};render()">${esc(x.c)}</button>`).join('')}</div><div class="pmain">${c.b?`<button class="mtog ${pm?'on':''}" onclick="pm=!pm;render()" aria-pressed="${pm}">${pm?'✓ ':''}Als Menü (+${eur(MENU_ADD)}) – für den nächsten Burger</button>`:''}<div class="tiles">${c.it.map(x=>{const q=tkQ(x.n);return `<button class="tile ${x.off?'off':''} ${q?'has':''}" ${x.off?'disabled':''} onclick="tAdd('${x.i}')">${q?`<i class="qb">${q}</i>`:''}<b>${esc(x.n)}</b><span>${x.off?'Aus':eur(x.p)}</span></button>`}).join('')}</div></div></div>`}
 function tAdd(i){const x=find(i);if(!x)return;const m=pm&&isBurgerCat(i),n=x.n+(m?' als Menü':''),l=tk.find(y=>y.n===n&&!y.note);l?l.q++:tk.push({n,p:x.p+(m?MENU_ADD:0),q:1,note:''});if(m)pm=false;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}render();const t=$('.tkt .tl:last-child');t&&t.classList.add('fl')}
 const tkT=()=>tk.reduce((s,l)=>s+l.p*l.q,0);
 function ticket(foot){const tt=tkT(),n=tk.reduce((s,l)=>s+l.q,0);return `<div class="tkt" id="tkt"><button class="sht" onclick="tkSheet(0)" aria-label="Bon schließen"></button><div class="th"><b>Bon</b><span>${n} Artikel</span>${tk.length?'<button class="lnk" onclick="tk=[];given=\'\';tkOpen=false;render()">Leeren</button>':''}<button class="x" onclick="tkSheet(0)" aria-label="Bon schließen">✕</button></div><div class="tls">${tk.map((l,k)=>`<div class="tl"><div class="tq"><button onclick="tQ(${k},-1)" aria-label="Weniger">−</button><b>${l.q}</b><button onclick="tQ(${k},1)" aria-label="Mehr">+</button></div><button class="tn" onclick="tkEd=${tkEd===k?-1:k};render()">${esc(l.n)}${l.note?`<small>» ${esc(l.note)}</small>`:'<small class="ad">+ Anmerkung</small>'}</button><span class="tp">${eur(l.p*l.q)}</span>${tkEd===k?`<input class="tnote" value="${esc(l.note)}" placeholder="z. B. ohne Zwiebeln …" oninput="tk[${k}].note=this.value" onkeydown="if(event.key==='Enter'){tkEd=-1;render()}" autofocus>`:''}</div>`).join('')||'<p class="mu" style="padding:14px 0">Tippe auf ein Produkt.</p>'}</div><div class="ttot"><span>Gesamt</span><b>${eur(tt)}</b></div>${foot(tt)}</div>`}
